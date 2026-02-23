@@ -1,6 +1,6 @@
-FCFLAGS=-mp -fPIC -Minfo -gopt -Mlarge_arrays -Mlist -traceback -Mnofma -Mbyteswapio -Mbackslash \
+FCFLAGS=-DUSE_OPENACC -mp -fPIC -Minfo -gopt -Mlarge_arrays -Mlist -traceback -Mnofma -Mbyteswapio -Mbackslash \
   -Mstack_arrays -cuda -acc=gpu -O1 -gopt -gpu=cc70,cc80 -Minfo=accel,all,ccff 
-LIBS= -L/opt/softs/gcc/9.2.0/hpc_sdk/Linux_x86_64/24.7/math_libs/12.5/targets/x86_64-linux/lib -lnvhpcwrapnvtx -lnvToolsExt -lblas -cudalib=cublas
+LIBS=-DUSE_OPENACC -L/opt/softs/gcc/9.2.0/hpc_sdk/Linux_x86_64/24.7/math_libs/12.5/targets/x86_64-linux/lib -lnvhpcwrapnvtx -lnvToolsExt -lblas -cudalib=cublas
 
 FC=fxtran-f90 \
   --prefix fxtran-acdc \

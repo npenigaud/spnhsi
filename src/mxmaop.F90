@@ -162,10 +162,6 @@ real(kind=jprb), intent(in) :: pb(ligneB,colB)
 integer(kind=jpim) :: ii,ij,ik
 integer(kind=jpim) :: ni,nj,nk
 
-ni=size(pa,1)
-nj=size(pb,1)
-nk=size(pc,1)
-
 do ik=1,ligneA
   do ii=1,colB
     pab(ik,ii)=0._jprb
@@ -186,7 +182,12 @@ real(kind=jprb), intent(in) :: pb(ligneB,colB)
 
 integer(kind=jpim) :: ii,ij,ik
 
-!$omp target teams distribute parallel do simd private(ij) collapse(2) map(tofrom:pab,pa,pb) if(ldacc)
+#ifdef USE_OPENACC
+!$acc parallel loop gang vector collapse(2) private(ij) present(pab,pa,pb) !if(ldacc)
+#endif
+#ifdef USE_OPENMP
+!$omp target teams distribute parallel do simd private(ij) collapse(2) map(present:pab,pa,pb) if(ldacc)
+#endif
 do ik=1,ligneB
   do ii=1,ligneA
     pab(ik,ii)=0._jprb
@@ -195,7 +196,9 @@ do ik=1,ligneB
     end do
   end do
 end do
+#ifdef USE_OPENMP
 !$omp end target teams distribute parallel do simd
+#endif
 
 end subroutine simple_dgemm3
 
