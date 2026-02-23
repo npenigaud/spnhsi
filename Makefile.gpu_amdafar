@@ -1,0 +1,16 @@
+FCFLAGS=-march=native -g -fPIC -ffree-form -cpp -fbackslash -fconvert=big-endian -O2 -I/home/penigaudn/install-newfxtranacdc/actke49t2/compile.gpu_afar_d/fxtran-acdc/lib -ffp-contract=off -DARCH="'afar221ompd'" -fopenmp -fPIC -fopenmp --offload-arch=gfx942 -DUSE_OPENMP -lflang_rt.hostdevice -I/home/afar/software/compilers/afar/rocm-afar-8873-drop-22.2.0/include/hipfort/amdgcn/ -I/home/afar/software/compilers/afar/rocm-afar-8873-drop-22.2.0/include/rocblas/  -L/home/afar/software/compilers/afar/rocm-afar-8873-drop-22.2.0/lib/ -Qunused-arguments 
+ 
+CCFLAGS=-march=native -fPIC -fopenmp -O2 -ffp-contract=off --offload-arch=gfx942 -DUSE_OPENMP -Qunused-arguments 
+
+ARCH=gpu_amd_d
+LIBS=/home/afar/software/compilers/afar/rocm-afar-8873-drop-22.2.0/lib/libhipfort-amdgcn.a -L/lib/x86_64-libgnu -lblas -L/home/afar/software/compilers/afar/rocm-afar-8873-drop-22.2.0/lib/ -lrocblas -lamdhip64
+
+FC=fxtran-f90 --prefix fxtran-acdc --user-directory-in user-in --user-directory-out user-out --config $(SRC)/fxtran.conf -- flang  $(FCFLAGS) -DARCH="'$(ARCH)'"
+
+boot: fxtran-acdc
+	\mkdir -p boot
+
+fxtran-acdc:
+	fxtran-boot --prefix fxtran-acdc --F90 "flang $(FCFLAGS)" -CXX "clang $(CCFLAGS)"
+
+CC=clang

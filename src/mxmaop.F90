@@ -73,7 +73,8 @@ INTEGER(KIND=JPIM),INTENT(IN)    :: KAR
 INTEGER(KIND=JPIM),INTENT(IN)    :: KAC 
 INTEGER(KIND=JPIM),INTENT(IN)    :: KBC
 LOGICAL, OPTIONAL, INTENT(IN)    :: LDACC
-
+character :: clenv2
+integer(kind=jpim) :: ilenv2
 !     ------------------------------------------------------------------
 
 INTEGER(KIND=JPIM) :: JJJ,JLEN,JT,JCHUNK
@@ -84,13 +85,21 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !     ------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MXMAOP',0,ZHOOK_HANDLE)
 !     ------------------------------------------------------------------
-
+call get_environment_variable("LLSIMPLE_DGEMM",clenv2,ilenv2)
+if (ilenv2==0) clenv2='0'
 LLACC=.FALSE.
 IF (PRESENT(LDACC)) LLACC=LDACC
-
+if (clenv2=='1') then
+  if (llacc) then
+    call simple_dgemm3(pc,pa,kar,kac,pb,kbc,kac,llacc)
+  else
+    call simple_dgemm2(pc,pa,kar,kac,pb,kac,kbc,llacc)
+!    call simple_dgemm2(pc,pa,kad,kbd,pb,kbd,kbd,llacc)
+  endif
+else
 IF (LLACC) THEN
-
-  CALL SGEMMXACC(PA,KA,KAD,PB,KB,KBD,PC,KC,KCA,KAR,KAC,KBC)
+!   write (0,*) "branche mxmaop llacc"
+   CALL SGEMMXACC(PA,KA,KAD,PB,KB,KBD,PC,KC,KCA,KAR,KAC,KBC)
 
 ELSE
 
@@ -137,9 +146,58 @@ ELSE
   ENDIF
 
 ENDIF
-
+endif
 !     ------------------------------------------------------------------
 
 IF (LHOOK) CALL DR_HOOK('MXMAOP',1,ZHOOK_HANDLE)
+contains
+
+subroutine simple_dgemm2(pab,pa,ligneA,colA,PB,ligneB,colB,ldacc)
+integer(kind=jpim), intent(in) :: ligneA,colA,ligneB,colB
+logical, intent(in) :: ldacc
+real(kind=jprb), intent(out) :: pab(ligneA,colB)
+real(kind=jprb), intent(in) :: pa(ligneA,colA)
+real(kind=jprb), intent(in) :: pb(ligneB,colB)
+
+integer(kind=jpim) :: ii,ij,ik
+integer(kind=jpim) :: ni,nj,nk
+
+ni=size(pa,1)
+nj=size(pb,1)
+nk=size(pc,1)
+
+do ik=1,ligneA
+  do ii=1,colB
+    pab(ik,ii)=0._jprb
+    do ij=1,colA
+      pab(ik,ii)=pab(ik,ii)+pa(ik,ij)*pb(ij,ii)
+    end do
+  end do
+end do
+
+end subroutine simple_dgemm2
+
+subroutine simple_dgemm3(pab,pa,ligneA,colA,PB,ligneB,colB,ldacc)
+integer(kind=jpim), intent(in) :: ligneA,colA,ligneB,colB
+logical, intent(in) :: ldacc
+real(kind=jprb), intent(out) :: pab(ligneB,ligneA)
+real(kind=jprb), intent(in) :: pa(ligneA,colA)
+real(kind=jprb), intent(in) :: pb(ligneB,colB)
+
+integer(kind=jpim) :: ii,ij,ik
+
+!$omp target teams distribute parallel do simd private(ij) collapse(2) map(tofrom:pab,pa,pb) if(ldacc)
+do ik=1,ligneB
+  do ii=1,ligneA
+    pab(ik,ii)=0._jprb
+    do ij=1,colB
+      pab(ik,ii)=pab(ik,ii)+pb(ik,ij)*pa(ii,ij)
+    end do
+  end do
+end do
+!$omp end target teams distribute parallel do simd
+
+end subroutine simple_dgemm3
+
 END SUBROUTINE MXMAOP
 

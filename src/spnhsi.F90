@@ -233,8 +233,6 @@ ASSOCIATE(NSMAX=>YDDIM%NSMAX, &
 
 !     ------------------------------------------------------------------
 
-
-
 ! * Case where the C1 constraint is not matched.
 LLNH_NOC1=.NOT.(YDCVER%NDLNPR == 1)
 IF (LLNH_NOC1) THEN
@@ -273,7 +271,7 @@ DO JLEV=1,NFLEVG
 ENDDO
 !$OMP END PARALLEL DO
 
-!$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
+!$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV) 
 DO JSP=KSTA,KEND
     ZZSPSPG (JSP)=PSPSPG (JSP)
 ENDDO
@@ -312,6 +310,8 @@ IF (LRSIDDH) THEN
 !$ACDC }
 
 ENDIF
+
+
 !     ------------------------------------------------------------------
 
 !*       2.    SEMI-IMPLICIT SPECTRAL COMPUTATIONS.
@@ -370,7 +370,9 @@ DO JITER=0,I_NITERHELM
     !   b/ (g TRSI)/(H TARSI) LLstar Qcha_rhs in array ZSVED.
 
 
+
     CALL SIDD(YDCST,YDGEOMETRY,YDDYN,YDDYNA,ISPCOL,NFLEVG,1,ISPCOL,ZSDIV,ZSVED,ZZSPSPDG,ZZSPTG,ZZSPSPG)
+
 
     ! * Provides Dprim_star_star in ZSDIV.
 !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
@@ -381,10 +383,13 @@ DO JITER=0,I_NITERHELM
     ENDDO
 !$OMP END PARALLEL DO
 
+
   ELSE
+
 
     ! * Compute C**2 * COR * Mbar**2 D'(t+dt,jiter-1)
     CALL SI_CCCOR(YDCST,YDGEOMETRY,YDDYN,YDDYNA,ISPCOL,NFLEVG,1,ISPCOL,ZZSPGDIVG,ZSDIV)
+
 
     ! * Multiply by beta**2 (Delta t)**2 vnabla'**2
 !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
@@ -424,7 +429,9 @@ DO JITER=0,I_NITERHELM
 
 !$ACDC }
 
+
   ENDIF
+
 
   ! * Provides Dprim_star_star (resp. Dprim_star_star_star) in ZR1D and
   !   ZR1DPRIM if LIMPF=F (resp. LIMPF=T); and Dcha_star_star in ZR2D.
@@ -455,7 +462,9 @@ DO JITER=0,I_NITERHELM
     ENDDO
 !$OMP END PARALLEL DO
 
+
   IF (LSIDG .OR. LESIDG) THEN
+
 
 !$ACDC HORIZONTAL {
 
@@ -480,6 +489,9 @@ DO JITER=0,I_NITERHELM
 !$OMP END PARALLEL DO
 
   ENDIF
+
+
+
   ! * Provides "LLstar Dprim_star_star" if LIMPF=F, or
   !   "LLstar Dprim_star_star_star" if LIMPF=T
   !   (mult by a constant coefficient) in ZSRHS.
@@ -493,6 +505,9 @@ DO JITER=0,I_NITERHELM
   !   "LLstar Tau Dprim_star_star_star" if LIMPF=T 
   !   (mult by a constant coefficient) in ZWORK.
   CALL SISEVE(YDCST,YDGEOMETRY,YDDYN,YDDYNA,ISPCOL,NFLEVG,1,ISPCOL,ZST,ZWORK)
+
+
+
 
 !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
   DO JLEV=1,NFLEVG
@@ -521,6 +536,7 @@ DO JITER=0,I_NITERHELM
       ENDDO
 !$OMP END PARALLEL DO
 
+
 !$ACDC HORIZONTAL {
 
     IF (LSIDG) THEN
@@ -535,6 +551,7 @@ DO JITER=0,I_NITERHELM
     ENDIF
 
 !$ACDC }
+
 
 !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
       DO JLEV=1,NFLEVG
@@ -579,6 +596,8 @@ DO JITER=0,I_NITERHELM
 !$OMP END PARALLEL DO
   ENDIF
 
+
+
   ! * Provides "SIFAC * RHS of the Helmholtz eqn" in ZSRHS2.
 !$OMP PARALLEL DO SCHEDULE(STATIC) PRIVATE(JSP,JLEV)
   DO JLEV=1,NFLEVG
@@ -614,6 +633,7 @@ DO JITER=0,I_NITERHELM
 
   ENDIF
 
+
   ! * Multiply by array SIFACI to obtain the RHS of the Helmholtz eqn,
   !   stored in ZSRHS.
 
@@ -629,6 +649,7 @@ DO JITER=0,I_NITERHELM
    & NFLEVG,NFLEVG,ISPCOL)
 
   ! Inversion of Helmholtz equation itself.
+
 
   IF (LSIDG .OR. LESIDG) THEN
 
@@ -690,12 +711,18 @@ DO JITER=0,I_NITERHELM
 
   ENDIF
 
+
+
+
   ! Vertical eigenmodes space --> current space.
   ! (multiply by matrix Q**(-1) stored in SIMO).
   ! Provides dver(t+dt).
 
   CALL MXMAOPTR(SIMO,1,NFLEVG,ZSPDIVP,1,NFLEVG,ZZSPSVDG,1,&
    & NFLEVG,NFLEVG,NFLEVG,ISPCOL)
+
+
+
 
   !*        2.5  Recover the other prognostic variables
   !              (successively D, T, "spd" and log(prehyds)).
@@ -707,6 +734,8 @@ DO JITER=0,I_NITERHELM
 
   ! * Provides "Gamma d(t+dt)" in array ZWORK.
   CALL SIGAM(YDCST,YDGEOMETRY,YDDYN,ISPCOL,NFLEVG,1,ISPCOL,ZWORK,ZZSPSVDG,ZSP)
+
+
 
   ! * Provides
   !   " beta**2 (Delta t)**2 vnabla'**2 (- SITR Gamma + C**2) d(t+dt)
@@ -723,9 +752,9 @@ DO JITER=0,I_NITERHELM
     ENDDO
   ENDDO
 !$OMP END PARALLEL DO
+
   ! * Provides D'(t+dt).
   IF (LSIDG .OR. LESIDG) THEN
-
     ! * Divide by the pentadiagonal operator
     !   [I - beta**2 (Delta t)**2 vnabla'**2 C**2 M**2]
     !   For KM>0 one works with the symmetric
@@ -734,15 +763,12 @@ DO JITER=0,I_NITERHELM
     !   Use ZSDIVPL and ZSPDIVPL as intermediate work arrays.
 
 !$ACDC HORIZONTAL {
-
     CALL SPCSIDG_PART0NH(YDGEOMETRY,YDDYN,KSTA,KEND,ZSRHS,&
      & SILAPIN,KM,IOFF)
-
     !!SPCSIDG_PART1 called on KMLOC...KMLOC, except if KM=-999 
     CALL SPCSIDG_PART1(YDGEOMETRY,YDDYN,KSTA,KEND,ZSRHS,&
          &ZZSPDIVG,IMLOCSTA,IMLOCEND,LSIDG,NSZNISNAX,SINISNAX,&
          &SIHEGBTRA,SIHEGB2TRA)
-
 !$ACDC }
 
   ELSE
@@ -772,6 +798,8 @@ DO JITER=0,I_NITERHELM
     ENDIF
 
   ENDIF
+
+
 
   ! * Provides Mbar**2 D'(t+dt).
   IF (LSIDG) THEN
@@ -806,6 +834,8 @@ DO JITER=0,I_NITERHELM
     ENDDO
 !$OMP END PARALLEL DO
   ENDIF
+
+
 
   !*       2.6  Increment vorticity for case LIMPF=T
   !             (identical to part 2.6 of SPCSI).
@@ -909,6 +939,9 @@ IF (I_NITERHELM > 0) THEN
 ENDIF
 !*       2.9  Increment T, log(prehyds) and spd.
 
+
+
+
 ! * Provides some intermediate quantities allowing to compute
 !   T(t+dt) (in ZST), log(prehyds)(t+dt) (in ZSP), spd(t+dt) (in ZSNHP).
 CALL SIPTP(YDCST,YDGEOMETRY,YDDYN,YDDYNA,ISPCOL,NFLEVG,1,ISPCOL,ZWORK,ZZSPSVDG,ZSNHP,ZST,ZSP)
@@ -931,6 +964,10 @@ ENDDO
 !$OMP END DO SIMD
 !$OMP END PARALLEL 
 ! ky: if LESIDG, missing there the reverse shift.
+
+
+
+
 !     ------------------------------------------------------------------
 
 !*       3.    MEMORY TRANSFER AND DDH-SI UPDATE.

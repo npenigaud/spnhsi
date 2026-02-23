@@ -59,7 +59,6 @@ IF (LLACC) THEN
 
 ELSE
 
-
   IIS=2
   II0=1
   IF (.NOT. LDSIDG) THEN

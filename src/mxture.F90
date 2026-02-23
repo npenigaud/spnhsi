@@ -153,10 +153,10 @@ IIX=KIX-MOD(KIX,2)
 !              ------------------
 
 ! solves the linear system L.PY=PYin
-!$OMP PARALLEL PRIVATE(JI,JV,JL,ZBB,ZCC)
+!!$OMP PARALLEL PRIVATE(JI,JV,JL,ZBB,ZCC)
 IF (IT1 == -3) THEN
   DO JI=1,IIX,2
-    !$OMP DO 
+    !!$OMP DO 
     DO JV=1,KVX
       PY(JI,1,JV)=PY(JI,1,JV)
       PY(JI+1,1,JV)=PY(JI+1,1,JV)
@@ -170,7 +170,7 @@ IF (IT1 == -3) THEN
 
   IF (KLX >= 2) THEN
     DO JI=1,IIX,2
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         PY(JI,2,JV)=PY(JI,2,JV)-PB(1,JV)*PY(JI,1,JV)
         PY(JI+1,2,JV)=PY(JI+1,2,JV)-PB(1,JV)*PY(JI+1,1,JV)
@@ -185,7 +185,7 @@ IF (IT1 == -3) THEN
 
   IF (KLX >= 3) THEN
     DO JI=1,IIX,2
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=3,KLX
           PY(JI,JL,JV)=PY(JI,JL,JV)-PB(JL-1,JV)*PY(JI,JL-1,JV)&
@@ -196,7 +196,7 @@ IF (IT1 == -3) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=3,KLX
            PY(JI,JL,JV)=PY(JI,JL,JV)-PB(JL-1,JV)*PY(JI,JL-1,JV)&
@@ -208,14 +208,14 @@ IF (IT1 == -3) THEN
 
 ELSEIF (IT1==-2) THEN
   DO JI=1,IIX,2
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PY(JI,1,JV)=PY(JI,1,JV)/PA(1,JV)
       PY(JI+1,1,JV)=PY(JI+1,1,JV)/PA(1,JV)    
     ENDDO
   ENDDO
   DO JI=IIX+1,KIX
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PY(JI,1,JV)=PY(JI,1,JV)/PA(1,JV)
     ENDDO
@@ -223,14 +223,14 @@ ELSEIF (IT1==-2) THEN
 
   IF (KLX >= 2) THEN
     DO JI=1,IIX,2
-      !$OMP DO 
+      !!$OMP DO 
       DO JV=1,KVX
         PY(JI,2,JV)=(PY(JI,2,JV)-PB(1,JV)*PY(JI,1,JV))/PA(2,JV)
         PY(JI+1,2,JV)=(PY(JI+1,2,JV)-PB(1,JV)*PY(JI+1,1,JV))/PA(2,JV)
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         PY(JI,2,JV)=(PY(JI,2,JV)-PB(1,JV)*PY(JI,1,JV))/PA(2,JV)
       ENDDO
@@ -239,7 +239,7 @@ ELSEIF (IT1==-2) THEN
 
   IF (KLX >= 3) THEN
     DO JI=1,IIX,2
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=3,KLX
           PY(JI,JL,JV)=(PY(JI,JL,JV)-PC(JL-2,JV)*PY(JI,JL-2,JV)&
@@ -250,7 +250,7 @@ ELSEIF (IT1==-2) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=3,KLX
           PY(JI,JL,JV)=(PY(JI,JL,JV)-PC(JL-2,JV)*PY(JI,JL-2,JV)&
@@ -265,14 +265,14 @@ ENDIF
 ! solves U.PX=Linv.PYin with Linv.PYin in PY
 IF (IT2 == 1) THEN
   DO JI=1,IIX,2
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)
       PX(JI+1,KLX,JV)=PY(JI+1,KLX,JV)
     ENDDO
   ENDDO
   DO JI=IIX+1,KIX
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)
     ENDDO
@@ -280,7 +280,7 @@ IF (IT2 == 1) THEN
 
   IF (KLX >= 2) THEN
     DO JI=1,IIX,2
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         ZBB=PB(KLX-1,JV)/PA(KLX-1,JV)
         PX(JI,KLX-1,JV)=PY(JI,KLX-1,JV)-ZBB*PX(JI,KLX,JV)
@@ -288,7 +288,7 @@ IF (IT2 == 1) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         ZBB=PB(KLX-1,JV)/PA(KLX-1,JV)
         PX(JI,KLX-1,JV)=PY(JI,KLX-1,JV)-ZBB*PX(JI,KLX,JV)
@@ -298,7 +298,7 @@ IF (IT2 == 1) THEN
 
   IF (KLX >= 3) THEN
     DO JI=1,IIX,2
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           ZBB=PB(JL,JV)/PA(JL,JV)
@@ -309,7 +309,7 @@ IF (IT2 == 1) THEN
       ENDDO
     ENDDO
     DO JI=1+IIX,KIX
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           ZBB=PB(JL,JV)/PA(JL,JV)
@@ -322,14 +322,14 @@ IF (IT2 == 1) THEN
 
 ELSEIF (IT2==2) THEN
   DO JI=1,IIX,2
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)/PA(KLX,JV)
       PX(JI+1,KLX,JV)=PY(JI+1,KLX,JV)/PA(KLX,JV)
     ENDDO
   ENDDO
   DO JI=IIX+1,KIX
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)/PA(KLX,JV)
     ENDDO
@@ -337,7 +337,7 @@ ELSEIF (IT2==2) THEN
 
   IF (KLX >= 2) THEN
     DO JI=1,IIX,2
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         PX(JI,KLX-1,JV)=&
          & (PY(JI,KLX-1,JV)-PD(KLX-1,JV)*PX(JI,KLX,JV))/PA(KLX-1,JV)
@@ -346,7 +346,7 @@ ELSEIF (IT2==2) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         PX(JI,KLX-1,JV)=&
          & (PY(JI,KLX-1,JV)-PD(KLX-1,JV)*PX(JI,KLX,JV))/PA(KLX-1,JV)
@@ -356,7 +356,7 @@ ELSEIF (IT2==2) THEN
 
   IF (KLX >= 3) THEN
     DO JI=1,IIX,2
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           PX(JI,JL,JV)=(PY(JI,JL,JV)-PD(JL,JV)*PX(JI,JL+1,JV)&
@@ -367,7 +367,7 @@ ELSEIF (IT2==2) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           PX(JI,JL,JV)=(PY(JI,JL,JV)-PD(JL,JV)*PX(JI,JL+1,JV)&
@@ -379,14 +379,14 @@ ELSEIF (IT2==2) THEN
 
 ELSEIF (IT2 == 3) THEN
   DO JI=1,IIX,2
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)
       PX(JI+1,KLX,JV)=PY(JI+1,KLX,JV)
     ENDDO
   ENDDO
   DO JI=IIX+1,KIX
-    !$OMP DO
+    !!$OMP DO
     DO JV=1,KVX
       PX(JI,KLX,JV)=PY(JI,KLX,JV)
     ENDDO
@@ -394,7 +394,7 @@ ELSEIF (IT2 == 3) THEN
 
   IF (KLX >= 2) THEN
     DO JI=1,IIX,2
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         ZBB=PD(KLX-1,JV)
         PX(JI,KLX-1,JV)=PY(JI,KLX-1,JV)-ZBB*PX(JI,KLX,JV)
@@ -402,7 +402,7 @@ ELSEIF (IT2 == 3) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO
+      !!$OMP DO
       DO JV=1,KVX
         ZBB=PD(KLX-1,JV)
         PX(JI,KLX-1,JV)=PY(JI,KLX-1,JV)-ZBB*PX(JI,KLX,JV)
@@ -412,7 +412,7 @@ ELSEIF (IT2 == 3) THEN
 
   IF (KLX >= 3) THEN
     DO JI=1,IIX,2
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           ZBB=PD(JL,JV)
@@ -423,7 +423,7 @@ ELSEIF (IT2 == 3) THEN
       ENDDO
     ENDDO
     DO JI=IIX+1,KIX
-      !$OMP DO SIMD
+      !!$OMP DO SIMD
       DO JV=1,KVX
         DO JL=KLX-2,1,-1
           ZBB=PD(JL,JV)
@@ -435,7 +435,7 @@ ELSEIF (IT2 == 3) THEN
   ENDIF
 
 ENDIF
-!$OMP END PARALLEL
+!!$OMP END PARALLEL
 !     ------------------------------------------------------------------
 
 IF (LHOOK) CALL DR_HOOK('MXTURE',1,ZHOOK_HANDLE)

@@ -103,7 +103,7 @@ REAL(KIND=JPRB),OPTIONAL,INTENT(IN) :: PINS(KPROMA)
 
 !     ------------------------------------------------------------------
 
-LOGICAL :: LLVERINT_ON_CPU
+LOGICAL :: LLVERINT_ON_CPU = .TRUE.
 
 CHARACTER(LEN=2)   :: CLBC
 INTEGER(KIND=JPIM) :: ILEVIN, ILEVOUT, IND, IEND, ITYPE, JCHUNK
@@ -122,13 +122,11 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !     ------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('VERDISINT',0,ZHOOK_HANDLE)
 !     ------------------------------------------------------------------
-
 IF (LLVERINT_ON_CPU) THEN
   IMAXTHREADS = OML_MAX_THREADS ()
 ELSE
   IMAXTHREADS = 1
 ENDIF
-
 !*   1. Initialization and control
 !    -----------------------------
 
@@ -141,7 +139,6 @@ IF (YDCVER%LVFE_ECMWF) THEN
 ELSE
   CLBC=CDBC
 ENDIF
-
 
 !*   2. Set operator size according to boundary conditions applied
 !    --------------------------------------------------------------
@@ -176,7 +173,6 @@ IEND=ILEVIN-1+IND
 !*   3.1 Vertical integral
 !    ---------------------
 IF (CDOPER(1:4)=='INGW') THEN
-  write(0,*) "oper INWG",present(KLOUT),present(PINS)
   ZOPER => YDVFE%RINTGW(:,:)
 ELSEIF (ANY(CDOPER(1:4) == (/'ITOP','IBOT'/))) THEN
   IF (CLBC=='XX') THEN
@@ -192,7 +188,6 @@ ELSEIF (ANY(CDOPER(1:4) == (/'ITOP','IBOT'/))) THEN
 ELSEIF (CDOPER=='INTG') THEN
   ZOPER => YDVFE%RINTG(:,:)
 ENDIF
-
 !*   3.2 Vertical derivative
 !    -----------------------
 
@@ -237,7 +232,6 @@ ENDIF
 
 !*   4. Apply the required operation
 !    --------------------------------
-
 IF (ANY(CDOPER(1:4) == (/'INGW','ITOP','IBOT','INTG'/))) THEN
   IF(PRESENT(KCHUNK)) THEN
     JCHUNK=KCHUNK
@@ -280,12 +274,15 @@ IF (ANY(CDOPER(1:4) == (/'INGW','ITOP','IBOT','INTG'/))) THEN
 
     CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
       &JCHUNK,ZOUTS)
+
   ELSEIF (ITYPE == 1) THEN
     ! no copy needed
+
     CALL VERINTS(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),ZOUTS)
 
     CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
       &JCHUNK,ZOUTS,PINS)
+
   ELSEIF ((ILEVOUT == KFLEV+1).AND.(.NOT.PRESENT(KLOUT)).AND.(CDOPER(1:4)/='INTG')) THEN
     IF (PRESENT(PINS)) CALL ABOR1("ERROR: PINS MEANINGLESS WITH POUTS")
 
@@ -299,9 +296,12 @@ IF (ANY(CDOPER(1:4) == (/'INGW','ITOP','IBOT','INTG'/))) THEN
 
     CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
       &JCHUNK,ZOUTS,PINS)
+
   ELSE
+
     CALL VERINT(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT,ITYPE,&
       &JCHUNK,PINS=PINS)
+
   ENDIF
 ELSEIF (ANY(CDOPER(1:4) == (/'FDER','HDER','DEGW','DDER'/))) THEN
   CALL VERDER(KPROMA,KST,KEND,ILEVIN,ILEVOUT,ZOPER,PIN(:,IND:IEND),POUT)
